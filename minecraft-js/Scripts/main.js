@@ -8,8 +8,10 @@ import { World } from './world';
 import { createUI } from './ui';
 
 import { Player } from './player.js';
+import { Physics } from './physics.js';
 
 const stats = new Stats();
+const physics = new Physics();
 document.body.append(stats.dom);
 
 //Renderer setup
@@ -78,6 +80,7 @@ function animate() {
     player.applyInputs(dt);
 
     requestAnimationFrame(animate);
+    physics.update(dt, player, world);
     renderer.render(scene, player.controls.isLocked ? player.camera : orbitCamera);
 
     stats.update();
