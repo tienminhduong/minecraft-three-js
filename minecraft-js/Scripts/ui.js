@@ -15,6 +15,10 @@ export function createUI(world, player, physics) {
     gui.add(world.size, 'width', 8, 128, 1).name('Width');
     gui.add(world.size, 'height', 8, 64, 1).name('Height');
 
+    const physicsFolder = gui.addFolder('Physics');
+    physicsFolder.add(physics.helpers, 'visible').name('Visualize Collisions');
+    physicsFolder.add(physics, 'simulationRate', 10, 1000).name('Sim Rate');
+
     const terrainFolder = gui.addFolder("Terrain");
     terrainFolder.add(world.params, 'seed', 0, 10000).name('Seed');
     terrainFolder.add(world.params.terrain, 'scale', 10, 100).name('Scale');
@@ -37,6 +41,10 @@ export function createUI(world, player, physics) {
 
     //gui.add(world, 'generate');
     gui.onChange(() => {
+        world.generate();
+    });
+
+    terrainFolder.onChange(() => {
         world.generate();
     });
 }
