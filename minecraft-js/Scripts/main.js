@@ -85,6 +85,7 @@ function animate() {
     player.applyInputs(dt);
 
     requestAnimationFrame(animate);
+    player.update(world);
     physics.update(dt, player, world);
     world.update(player);
     renderer.render(scene, player.controls.isLocked ? player.camera : orbitCamera);

@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
+const CENTER_SCREEN = new THREE.Vector2();
+
 export class Player {
 
     height = 1.75;
@@ -18,6 +20,9 @@ export class Player {
 
     cameraHelper = new THREE.CameraHelper(this.camera);
 
+    raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
+    selectedCoords = null;
+
     constructor(scene) {
         this.camera.position.set(32, 32, 32);
         scene.add(this.camera);
@@ -32,6 +37,16 @@ export class Player {
 
         document.addEventListener('keydown', this.onKeyDown.bind(this));
         document.addEventListener('keyup', this.onKeyUp.bind(this));
+
+        const selectionMaterial = new THREE.MeshBasicMaterial({
+            transparent: true,
+            opacity: 0.3,
+            color: 0xffffaa
+
+        });
+        const selectionGeometry = new THREE.BoxGeometry(1.01, 1.01, 1.01);
+        this.selectionHelper = new THREE.Mesh(selectionGeometry, selectionMaterial);
+        scene.add(this.selectionHelper);
     }
 
     applyInputs(dt) {
@@ -60,6 +75,21 @@ export class Player {
         this.#worldVelocity.copy(this.velocity);
         this.#worldVelocity.applyEuler(new THREE.Euler(0, this.camera.rotation.y, 0));
         return this.#worldVelocity;
+    }
+
+    update(world) {
+        this.updateRaycaster(world);
+    }
+
+    updateRaycaster(world) {
+        this.raycaster.set(CENTER_SCREEN, this.camera);
+        const intersections = this.raycaster.intersectObjects(world, true);
+
+        if (intersections.length > 0) {
+            const intersection = intersections[0];
+            this.selectedCoords = intersection.object.position;
+            console.log(intersection.object.position);
+        }
     }
 
     applyWorldDeltaVelocity(dv) {
