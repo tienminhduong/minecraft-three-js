@@ -12,18 +12,18 @@ export function createUI(world, player, physics) {
     playerFolder.add(player.boundsHelper, 'visible').name('Show Bounds Helper');
     playerFolder.add(player.cameraHelper, 'visible').name('Show Camera Helper');
 
-    gui.add(world.size, 'width', 8, 128, 1).name('Width');
-    gui.add(world.size, 'height', 8, 64, 1).name('Height');
+    // gui.add(world.size, 'width', 8, 128, 1).name('Width');
+    // gui.add(world.size, 'height', 8, 64, 1).name('Height');
 
     const physicsFolder = gui.addFolder('Physics');
     physicsFolder.add(physics.helpers, 'visible').name('Visualize Collisions');
     physicsFolder.add(physics, 'simulationRate', 10, 1000).name('Sim Rate');
 
     const terrainFolder = gui.addFolder("Terrain");
-    terrainFolder.add(world.params, 'seed', 0, 10000).name('Seed');
-    terrainFolder.add(world.params.terrain, 'scale', 10, 100).name('Scale');
-    terrainFolder.add(world.params.terrain, 'magnitude', 0, 1).name('Magnitude');
-    terrainFolder.add(world.params.terrain, 'offset', 0, 1).name('Offset');
+    terrainFolder.add(world, 'seed', 0, 10000).name('Seed');
+    // terrainFolder.add(world.params.terrain, 'scale', 10, 100).name('Scale');
+    // terrainFolder.add(world.params.terrain, 'magnitude', 0, 1).name('Magnitude');
+    // terrainFolder.add(world.params.terrain, 'offset', 0, 1).name('Offset');
 
 
     const resourcesFolder = gui.addFolder('Resources');

@@ -38,7 +38,6 @@ controls.update();
 const scene = new THREE.Scene();
 const physics = new Physics(scene);
 const world = new World();
-world.generate();
 scene.add(world);
 
 const player = new Player(scene);
