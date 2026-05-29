@@ -20,7 +20,7 @@ export function createUI(world, player, physics) {
     physicsFolder.add(physics, 'simulationRate', 10, 1000).name('Sim Rate');
 
     const terrainFolder = gui.addFolder("Terrain");
-    terrainFolder.add(world, 'seed', 0, 10000).name('Seed');
+    terrainFolder.add(world.params, 'seed', 0, 10000).name('Seed');
     // terrainFolder.add(world.params.terrain, 'scale', 10, 100).name('Scale');
     // terrainFolder.add(world.params.terrain, 'magnitude', 0, 1).name('Magnitude');
     // terrainFolder.add(world.params.terrain, 'offset', 0, 1).name('Offset');

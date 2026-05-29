@@ -22,7 +22,14 @@ export class World extends THREE.Group {
 
     constructor(seed = 0) {
         super();
-        this.seed = seed;
+        this.params = {
+            seed: seed,
+            terrain: {
+                scale: 50,
+                magnitude: 0.5,
+                offset: 0
+            }
+        };
     }
 
     getBlock(x, y, z) {
@@ -160,6 +167,14 @@ export class World extends THREE.Group {
             //console.log(`Removed chunk at X: ${chunk.userData.x} Z: ${chunk.userData.z}`);
 
         }
+    }
+
+    regenerate(player) {
+        this.children.forEach((obj) => {
+            obj.disposeChildren();
+        });
+        this.clear();
+        this.update(player);
     }
 
     generateChunk(x, z) {
