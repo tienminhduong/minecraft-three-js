@@ -78,15 +78,13 @@ scene.add(light3);
 //Render loop
 let previousTime = performance.now();
 function animate() {
+    requestAnimationFrame(animate);
 
     let currentTime = performance.now();
     let dt = (currentTime - previousTime) / 1000;
-
-    player.applyInputs(dt);
-
-    requestAnimationFrame(animate);
-    player.update(world);
     physics.update(dt, player, world);
+    player.applyInputs(dt);
+    player.update(world);
     world.update(player);
     renderer.render(scene, player.controls.isLocked ? player.camera : orbitCamera);
 

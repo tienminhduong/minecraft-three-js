@@ -82,13 +82,31 @@ export class Player {
     }
 
     updateRaycaster(world) {
-        this.raycaster.set(CENTER_SCREEN, this.camera);
-        const intersections = this.raycaster.intersectObjects(world, true);
+        this.raycaster.setFromCamera(CENTER_SCREEN, this.camera);
+        const intersections = this.raycaster.intersectObject(world, true);
 
         if (intersections.length > 0) {
             const intersection = intersections[0];
-            this.selectedCoords = intersection.object.position;
-            console.log(intersection.object.position);
+
+            // Get the position of the chunk the block is contain in
+            const chunk = intersection.object.parent;
+
+            // Get transformation matrix of the intersected block
+            const blockMatrix = new THREE.Matrix4();
+            intersection.object.getMatrixAt(intersection.instanceId, blockMatrix);
+
+            // Extract the world position of the block's transformation matrix
+            // and store it in selectedCoords
+            this.selectedCoords = chunk.position.clone();
+            this.selectedCoords.applyMatrix4(blockMatrix);
+            
+            this.selectionHelper.position.copy(this.selectedCoords);
+            this.selectionHelper.visible = true;
+
+            console.log(this.selectedCoords);
+        }else{
+            this.selectedCoords = null;
+            this.selectionHelper.visible = false;
         }
     }
 
