@@ -1,57 +1,69 @@
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import { resources } from "./blocks";
+import { Physics } from "./physics";
 
-import { resources } from './blocks';
-import { Physics } from './physics';
-
-
-export function createUI(world, player, physics, scene) {
+/**
+ * Sets up the UI controls
+ * @param {World} world
+ * @param {Player} player
+ * @param {Physics} physics
+ */
+export function setupUI(world, player, physics, scene) {
     const gui = new GUI();
 
-    const playerFolder = gui.addFolder('Player');
-    playerFolder.add(player, 'maxSpeed', 1, 20).name('Max Speed');
-    playerFolder.add(player, 'jumpSpeed', 1, 10, 0.1).name('Jump Speed');
-    playerFolder.add(player.boundsHelper, 'visible').name('Show Bounds Helper');
-    playerFolder.add(player.cameraHelper, 'visible').name('Show Camera Helper');
+    const playerFolder = gui.addFolder("Player");
+    playerFolder.add(player, "maxSpeed", 1, 20, 0.1).name("Max Speed");
+    playerFolder.add(player, "jumpSpeed", 1, 10, 0.1).name("Jump Speed");
+    playerFolder.add(player.boundsHelper, "visible").name("Show Player Bounds");
+    playerFolder.add(player.cameraHelper, "visible").name("Show Camera Helper");
 
-    // gui.add(world.size, 'width', 8, 128, 1).name('Width');
-    // gui.add(world.size, 'height', 8, 64, 1).name('Height');
+    const physicsFolder = gui.addFolder("Physics");
+    physicsFolder.add(physics.helpers, "visible").name("Visualize Collisions");
+    physicsFolder.add(physics, "simulationRate", 10, 1000).name("Sim Rate");
 
-    const physicsFolder = gui.addFolder('Physics');
-    physicsFolder.add(physics.helpers, 'visible').name('Visualize Collisions');
-    physicsFolder.add(physics, 'simulationRate', 10, 1000).name('Sim Rate');
+    const worldFolder = gui.addFolder("World");
+    worldFolder.add(world, "drawDistance", 0, 5, 1).name("Draw Distance");
+    worldFolder.add(world, "asyncLoading").name("Async Loading");
+    worldFolder.add(scene.fog, "near", 1, 200, 1).name("Fog Near");
+    worldFolder.add(scene.fog, "far", 1, 200, 1).name("Fog Far");
 
-    const terrainFolder = gui.addFolder("Terrain");
-    terrainFolder.add(world.params, 'seed', 0, 10000).name('Seed');
-    // terrainFolder.add(world.params.terrain, 'scale', 10, 100).name('Scale');
-    // terrainFolder.add(world.params.terrain, 'magnitude', 0, 1).name('Magnitude');
-    // terrainFolder.add(world.params.terrain, 'offset', 0, 1).name('Offset');
+    const terrainFolder = worldFolder.addFolder("Terrain");
+    terrainFolder.add(world.params, "seed", 0, 10000, 1).name("Seed");
+    terrainFolder.add(world.params.terrain, "scale", 10, 100).name("Scale");
+    terrainFolder
+        .add(world.params.terrain, "magnitude", 0, 1)
+        .name("Magnitude");
+    terrainFolder.add(world.params.terrain, "offset", 0, 1).name("Offset");
 
-    const worldFolder = gui.addFolder('World');
-    worldFolder.add(world, 'drawDistance', 1, 10, 1).name('Draw Distance');
-    worldFolder.add(world, 'asyncLoading').name('Async Loading');
-    worldFolder.add(scene.fog, 'near', 1, 200, 1).name('Fog Near');
-    worldFolder.add(scene.fog, 'far', 1, 200, 1).name('Fog Far');
+    const resourcesFolder = worldFolder.addFolder("Resources");
+    for (const resource of resources) {
+        const resourceFolder = resourcesFolder.addFolder(resource.name);
+        resourceFolder.add(resource, "scarcity", 0, 1).name("Scarcity");
+        const scaleFolder = resourceFolder.addFolder("Scale").close();
+        scaleFolder.add(resource.scale, "x", 10, 100).name("X Scale");
+        scaleFolder.add(resource.scale, "y", 10, 100).name("Y Scale");
+        scaleFolder.add(resource.scale, "z", 10, 100).name("Z Scale");
+    }
 
+    const treesFolder = worldFolder.addFolder("Trees");
+    treesFolder.add(world.params.trees, "frequency", 0, 0.1).name("Frequency");
+    treesFolder
+        .add(world.params.trees.trunkHeight, "min", 0, 10, 1)
+        .name("Min Trunk Height");
+    treesFolder
+        .add(world.params.trees.trunkHeight, "max", 0, 10, 1)
+        .name("Max Trunk Height");
+    treesFolder
+        .add(world.params.trees.canopy.size, "min", 0, 10, 1)
+        .name("Min Canopy Size");
+    treesFolder
+        .add(world.params.trees.canopy.size, "max", 0, 10, 1)
+        .name("Max Canopy Size");
+    treesFolder
+        .add(world.params.trees.canopy, "density", 0, 1)
+        .name("Canopy Density");
 
-    const resourcesFolder = gui.addFolder('Resources');
-
-    resources.forEach(resource => {
-        const folder = resourcesFolder.addFolder(resource.name);
-
-        folder.add(resource, 'scarity', 0, 1).name('Scarity');
-
-        const scaleFolder = folder.addFolder('Scale');
-        scaleFolder.add(resource.scale, 'x', 10, 100).name('X Scale');
-        scaleFolder.add(resource.scale, 'y', 10, 100).name('Y Scale');
-        scaleFolder.add(resource.scale, 'z', 10, 100).name('Z Scale');
-    });
-
-    //gui.add(world, 'generate');
-    gui.onChange(() => {
-        world.generate();
-    });
-
-    terrainFolder.onChange(() => {
+    worldFolder.onFinishChange((event) => {
         world.regenerate(player);
     });
 }

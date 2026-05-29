@@ -1,11 +1,10 @@
-import * as THREE from 'three';
-import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { blocks } from './blocks';
+import * as THREE from "three";
+import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+import { blocks } from "./blocks";
 
 const CENTER_SCREEN = new THREE.Vector2();
 
 export class Player {
-
     height = 1.75;
     radius = 0.5;
     maxSpeed = 5;
@@ -16,12 +15,22 @@ export class Player {
     velocity = new THREE.Vector3();
     #worldVelocity = new THREE.Vector3();
 
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera = new THREE.PerspectiveCamera(
+        70,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        200,
+    );
     controls = new PointerLockControls(this.camera, document.body);
 
     cameraHelper = new THREE.CameraHelper(this.camera);
 
-    raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
+    raycaster = new THREE.Raycaster(
+        new THREE.Vector3(),
+        new THREE.Vector3(),
+        0,
+        3,
+    );
     selectedCoords = null;
     activeBlockId = blocks.grass.id;
 
@@ -31,24 +40,35 @@ export class Player {
         scene.add(this.cameraHelper);
 
         this.boundsHelper = new THREE.Mesh(
-            new THREE.CylinderGeometry(this.radius, this.radius, this.height, 16),
-            new THREE.MeshBasicMaterial({ wireframe: true })
+            new THREE.CylinderGeometry(
+                this.radius,
+                this.radius,
+                this.height,
+                16,
+            ),
+            new THREE.MeshBasicMaterial({ wireframe: true }),
         );
         scene.add(this.boundsHelper);
         this.boundsHelper.visible = false;
 
-        document.addEventListener('keydown', this.onKeyDown.bind(this));
-        document.addEventListener('keyup', this.onKeyUp.bind(this));
+        document.addEventListener("keydown", this.onKeyDown.bind(this));
+        document.addEventListener("keyup", this.onKeyUp.bind(this));
 
         const selectionMaterial = new THREE.MeshBasicMaterial({
             transparent: true,
             opacity: 0.3,
-            color: 0xffffaa
-
+            color: 0xffffaa,
         });
         const selectionGeometry = new THREE.BoxGeometry(1.01, 1.01, 1.01);
-        this.selectionHelper = new THREE.Mesh(selectionGeometry, selectionMaterial);
+        this.selectionHelper = new THREE.Mesh(
+            selectionGeometry,
+            selectionMaterial,
+        );
         scene.add(this.selectionHelper);
+
+        // Set raycaster to use layer 0 so it doesn't interact with water mesh on layer 1
+        this.raycaster.layers.set(0);
+        this.camera.layers.enable(1);
     }
 
     applyInputs(dt) {
@@ -59,7 +79,8 @@ export class Player {
             this.controls.moveForward(this.velocity.z * dt);
             this.position.y += this.velocity.y * dt;
 
-            document.getElementById('player-position').innerHTML = this.toString();
+            document.getElementById("player-position").innerHTML =
+                this.toString();
         }
     }
 
@@ -68,14 +89,15 @@ export class Player {
         this.boundsHelper.position.y -= this.height / 2;
     }
 
-
     get position() {
         return this.camera.position;
     }
 
     get worldVelocity() {
         this.#worldVelocity.copy(this.velocity);
-        this.#worldVelocity.applyEuler(new THREE.Euler(0, this.camera.rotation.y, 0));
+        this.#worldVelocity.applyEuler(
+            new THREE.Euler(0, this.camera.rotation.y, 0),
+        );
         return this.#worldVelocity;
     }
 
@@ -86,31 +108,34 @@ export class Player {
     updateRaycaster(world) {
         this.raycaster.setFromCamera(CENTER_SCREEN, this.camera);
         const intersections = this.raycaster.intersectObject(world, true);
-    
+
         if (intersections.length > 0) {
-        const intersection = intersections[0];
+            const intersection = intersections[0];
 
-        // Get the chunk associated with the selected block
-        const chunk = intersection.object.parent;
+            // Get the chunk associated with the selected block
+            const chunk = intersection.object.parent;
 
-        // Get the transformation matrix for the selected block
-        const blockMatrix = new THREE.Matrix4();
-        intersection.object.getMatrixAt(intersection.instanceId, blockMatrix);
+            // Get the transformation matrix for the selected block
+            const blockMatrix = new THREE.Matrix4();
+            intersection.object.getMatrixAt(
+                intersection.instanceId,
+                blockMatrix,
+            );
 
-        // Set the selected coordinates to the origin of the chunk,
-        // then apply the transformation matrix of the block to get
-        // the block coordinates
-        this.selectedCoords = chunk.position.clone();
-        this.selectedCoords.applyMatrix4(blockMatrix);
+            // Set the selected coordinates to the origin of the chunk,
+            // then apply the transformation matrix of the block to get
+            // the block coordinates
+            this.selectedCoords = chunk.position.clone();
+            this.selectedCoords.applyMatrix4(blockMatrix);
 
-        if (this.activeBlockId !== blocks.empty.id) {
-            // If we are adding a block, move it 1 block over in the direction
-            // of where the ray intersected the cube
-            this.selectedCoords.add(intersection.normal);
-        }
+            if (this.activeBlockId !== blocks.empty.id) {
+                // If we are adding a block, move it 1 block over in the direction
+                // of where the ray intersected the cube
+                this.selectedCoords.add(intersection.normal);
+            }
 
-        this.selectionHelper.position.copy(this.selectedCoords);
-        this.selectionHelper.visible = true;
+            this.selectionHelper.position.copy(this.selectedCoords);
+            this.selectionHelper.visible = true;
         } else {
             this.selectedCoords = null;
             this.selectionHelper.visible = false;
@@ -122,43 +147,42 @@ export class Player {
         this.velocity.add(dv);
     }
 
-
     onKeyDown(event) {
         if (!this.controls.isLocked) {
             this.controls.lock();
-            console.log('Controls lock');
+            console.log("Controls lock");
         }
         switch (event.code) {
-            case 'Digit0':
-            case 'Digit1':
-            case 'Digit2':
-            case 'Digit3':
-            case 'Digit4':
-            case 'Digit5':
-            case 'Digit6':
-            case 'Digit7':
-            case 'Digit8':
-            case 'Digit9':
+            case "Digit0":
+            case "Digit1":
+            case "Digit2":
+            case "Digit3":
+            case "Digit4":
+            case "Digit5":
+            case "Digit6":
+            case "Digit7":
+            case "Digit8":
+            case "Digit9":
                 this.activeBlockId = Number(event.key);
-                console.log(`activeBlockId = ${event.key}`)
+                console.log(`activeBlockId = ${event.key}`);
                 break;
-            case 'KeyW':
+            case "KeyW":
                 this.input.z = this.maxSpeed;
                 break;
-            case 'KeyA':
+            case "KeyA":
                 this.input.x = -this.maxSpeed;
                 break;
-            case 'KeyS':
+            case "KeyS":
                 this.input.z = -this.maxSpeed;
                 break;
-            case 'KeyD':
+            case "KeyD":
                 this.input.x = this.maxSpeed;
                 break;
-            case 'KeyR':
+            case "KeyR":
                 this.position.set(32, 32, 32);
                 this.velocity.set(0, 0, 0);
                 break;
-            case 'Space':
+            case "Space":
                 if (this.onGround) {
                     this.velocity.y += this.jumpSpeed;
                 }
@@ -168,19 +192,18 @@ export class Player {
 
     onKeyUp(event) {
         switch (event.code) {
-            case 'KeyW':
+            case "KeyW":
                 this.input.z = 0;
                 break;
-            case 'KeyA':
+            case "KeyA":
                 this.input.x = 0;
                 break;
-            case 'KeyS':
+            case "KeyS":
                 this.input.z = 0;
                 break;
-            case 'KeyD':
+            case "KeyD":
                 this.input.x = 0;
                 break;
-
         }
     }
 
