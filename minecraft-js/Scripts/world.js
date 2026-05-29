@@ -252,4 +252,19 @@ export class World extends THREE.Group {
     }
 
 
+    /**
+    * Hides the block at (x,y,z) by removing the  new mesh instance
+    * @param {number} x 
+    * @param {number} y 
+    * @param {number} z 
+    */
+    hideBlockIfNeeded(x, y, z) {
+        const coords = this.worldToChunkCoords(x, y, z);
+        const chunk = this.getChunk(coords.chunk.x, coords.chunk.z);
+        
+        // Remove the block instance if it is totally obscured
+        if (chunk && chunk.isBlockObscured(coords.block.x, coords.block.y, coords.block.z)) {
+            chunk.deleteBlockInstance(coords.block.x, coords.block.y, coords.block.z);
+        }
+    }
 }
