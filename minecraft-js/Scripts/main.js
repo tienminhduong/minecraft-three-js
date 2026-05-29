@@ -72,8 +72,17 @@ const light3 = new THREE.AmbientLight();
 light3.intensity = 0.2;
 scene.add(light3);
 
-
-
+function onMouseDown(event){
+    if(player.controls.isLocked && player.selectedCoords){
+        console.log(`Removing block at ${player.selectedCoords}`);
+        world.removeBlock(
+            player.selectedCoords.x, 
+            player.selectedCoords.y, 
+            player.selectedCoords.z
+        );
+    }
+}
+document.addEventListener('mousedown', onMouseDown);
 
 //Render loop
 let previousTime = performance.now();

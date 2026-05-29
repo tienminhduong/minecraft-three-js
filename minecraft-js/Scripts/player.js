@@ -99,11 +99,11 @@ export class Player {
             // and store it in selectedCoords
             this.selectedCoords = chunk.position.clone();
             this.selectedCoords.applyMatrix4(blockMatrix);
-            
+
             this.selectionHelper.position.copy(this.selectedCoords);
             this.selectionHelper.visible = true;
 
-            console.log(this.selectedCoords);
+            //console.log(this.selectedCoords);
         }else{
             this.selectedCoords = null;
             this.selectionHelper.visible = false;

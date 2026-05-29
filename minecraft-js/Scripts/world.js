@@ -188,4 +188,13 @@ export class World extends THREE.Group {
         }
         this.add(chunk);
     }
+
+    removeBlock(x, y, z) {
+        const coords = this.worldToChunkCoords(x, y, z);
+        const chunk = this.getChunk(coords.chunk.x, coords.chunk.z);
+
+        if(chunk){
+            chunk.removeBlock(coords.block.x, y, coords.block.z);
+        }
+    }
 }
