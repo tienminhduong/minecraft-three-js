@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { blocks } from './blocks';
 
 const CENTER_SCREEN = new THREE.Vector2();
 
@@ -22,6 +23,7 @@ export class Player {
 
     raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
     selectedCoords = null;
+    activeBlockId = blocks.grass.id;
 
     constructor(scene) {
         this.camera.position.set(32, 32, 32);
@@ -84,27 +86,32 @@ export class Player {
     updateRaycaster(world) {
         this.raycaster.setFromCamera(CENTER_SCREEN, this.camera);
         const intersections = this.raycaster.intersectObject(world, true);
-
+    
         if (intersections.length > 0) {
-            const intersection = intersections[0];
+        const intersection = intersections[0];
 
-            // Get the position of the chunk the block is contain in
-            const chunk = intersection.object.parent;
+        // Get the chunk associated with the selected block
+        const chunk = intersection.object.parent;
 
-            // Get transformation matrix of the intersected block
-            const blockMatrix = new THREE.Matrix4();
-            intersection.object.getMatrixAt(intersection.instanceId, blockMatrix);
+        // Get the transformation matrix for the selected block
+        const blockMatrix = new THREE.Matrix4();
+        intersection.object.getMatrixAt(intersection.instanceId, blockMatrix);
 
-            // Extract the world position of the block's transformation matrix
-            // and store it in selectedCoords
-            this.selectedCoords = chunk.position.clone();
-            this.selectedCoords.applyMatrix4(blockMatrix);
+        // Set the selected coordinates to the origin of the chunk,
+        // then apply the transformation matrix of the block to get
+        // the block coordinates
+        this.selectedCoords = chunk.position.clone();
+        this.selectedCoords.applyMatrix4(blockMatrix);
 
-            this.selectionHelper.position.copy(this.selectedCoords);
-            this.selectionHelper.visible = true;
+        if (this.activeBlockId !== blocks.empty.id) {
+            // If we are adding a block, move it 1 block over in the direction
+            // of where the ray intersected the cube
+            this.selectedCoords.add(intersection.normal);
+        }
 
-            //console.log(this.selectedCoords);
-        }else{
+        this.selectionHelper.position.copy(this.selectedCoords);
+        this.selectionHelper.visible = true;
+        } else {
             this.selectedCoords = null;
             this.selectionHelper.visible = false;
         }
@@ -122,6 +129,15 @@ export class Player {
             console.log('Controls lock');
         }
         switch (event.code) {
+            case 'Digit0':
+            case 'Digit1':
+            case 'Digit2':
+            case 'Digit3':
+            case 'Digit4':
+            case 'Digit5':
+                this.activeBlockId = Number(event.key);
+                console.log(`activeBlockId = ${event.key}`)
+                break;
             case 'KeyW':
                 this.input.z = this.maxSpeed;
                 break;

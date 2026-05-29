@@ -9,6 +9,7 @@ import { createUI } from './ui';
 
 import { Player } from './player.js';
 import { Physics } from './physics.js';
+import { blocks } from './blocks';
 
 const stats = new Stats();
 document.body.append(stats.dom);
@@ -72,16 +73,25 @@ const light3 = new THREE.AmbientLight();
 light3.intensity = 0.2;
 scene.add(light3);
 
-function onMouseDown(event){
-    if(player.controls.isLocked && player.selectedCoords){
-        console.log(`Removing block at ${player.selectedCoords}`);
-        world.removeBlock(
-            player.selectedCoords.x, 
-            player.selectedCoords.y, 
-            player.selectedCoords.z
-        );
+function onMouseDown(event) {
+  if (player.controls.isLocked && player.selectedCoords) {
+    if (player.activeBlockId !== blocks.empty.id) {
+      world.addBlock(
+        player.selectedCoords.x,
+        player.selectedCoords.y,
+        player.selectedCoords.z,
+        player.activeBlockId
+      );
+    } else {
+      world.removeBlock(
+        player.selectedCoords.x,
+        player.selectedCoords.y,
+        player.selectedCoords.z
+      );
     }
+  }
 }
+
 document.addEventListener('mousedown', onMouseDown);
 
 //Render loop

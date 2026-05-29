@@ -186,6 +186,22 @@ export class WorldChunk extends THREE.Group {
         }
     }
 
+    /**
+    * Adds a new block at (x,y,z) of type `blockId`
+    * @param {number} x 
+    * @param {number} y 
+    * @param {number} z 
+    * @param {number} blockId 
+    */
+    addBlock(x, y, z, blockId) {
+        // Safety check that we aren't adding a block for one that
+        // already has an instance
+        if (this.getBlock(x, y, z).id === blocks.empty.id) {
+        this.setBlockId(x, y, z, blockId);
+        this.addBlockInstance(x, y, z);
+        this.dataStore.set(this.position.x, this.position.z, x, y, z, blockId);
+        }
+    }
 
     /**
      * Remove the block at (x, y, z)
@@ -237,7 +253,7 @@ export class WorldChunk extends THREE.Group {
         this.setBlockId(x, y, z, blocks.empty.id);
 
     }
-    
+
     /**
      * Create a new instance for the block at (x,y,z)
      * @param {number} x 

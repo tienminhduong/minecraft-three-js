@@ -43,6 +43,30 @@ export class World extends THREE.Group {
         }
     }
 
+    /**
+    * Adds a new block at (x,y,z)
+    * @param {number} x 
+    * @param {number} y 
+    * @param {number} z 
+    * @param {number} blockId 
+    */
+    addBlock(x, y, z, blockId) {
+        const coords = this.worldToChunkCoords(x, y, z);
+        const chunk = this.getChunk(coords.chunk.x, coords.chunk.z);
+        
+        if (chunk) {
+        chunk.addBlock(coords.block.x, coords.block.y, coords.block.z, blockId);
+
+        // Hide any blocks that may be totally obscured
+        this.hideBlockIfNeeded(x - 1, y, z);
+        this.hideBlockIfNeeded(x + 1, y, z);
+        this.hideBlockIfNeeded(x, y - 1, z);
+        this.hideBlockIfNeeded(x, y + 1, z);
+        this.hideBlockIfNeeded(x, y, z - 1);
+        this.hideBlockIfNeeded(x, y, z + 1);
+        }
+    }
+
     worldToChunkCoords(x, y, z) {
         const chunkCoords = {
             x: Math.floor(x / this.chunkSize.width),
