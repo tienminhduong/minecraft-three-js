@@ -221,10 +221,10 @@ export class Player {
 
             if (this.input.x !== 0 || this.input.z !== 0) {
                 const yaw = this.camera.rotation.y;
-                const angle = Math.atan2(this.input.x, this.input.z) + yaw;
-                this.model.rotation.y = angle + Math.PI;
+                const angle = Math.atan2(-this.input.x, this.input.z) + yaw;
+                this.model.rotation.y = angle; // + Math.PI;
             } else {
-                this.model.rotation.y = this.camera.rotation.y + Math.PI;
+                this.model.rotation.y = this.camera.rotation.y; // + Math.PI;
             }
 
             // Show model only in third-person, hide in first-person
@@ -321,7 +321,7 @@ export class Player {
 
         // Compute offset: behind the player and above
         // "Behind" means opposite of the facing direction on the XZ plane
-        const offsetX = -Math.sin(yaw) * this.thirdPersonDistance;
+        const offsetX = Math.sin(yaw) * this.thirdPersonDistance;
         const offsetZ = Math.cos(yaw) * this.thirdPersonDistance;
 
         this.thirdPersonCamera.position.set(
