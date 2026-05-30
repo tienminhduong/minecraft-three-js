@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 import { blocks } from "./blocks";
+import { HOTBAR_ITEM_TYPES, Toolbar } from "./toolbar";
+import { ToolAnimator } from "./toolAnimator";
+import { ToolManager, TOOL_TYPES } from "./tools";
 
 const CENTER_SCREEN = new THREE.Vector2();
 
@@ -33,11 +36,30 @@ export class Player {
     );
     selectedCoords = null;
     activeBlockId = blocks.grass.id;
+    toolbar = null;
+    toolAnimator = null;
+    toolManager = null;
+    blockMeshes = {}; // Cache of block meshes for display
+    onSelectedItemChanged = null;
 
     constructor(scene) {
         this.camera.position.set(32, 32, 32);
         scene.add(this.camera);
         scene.add(this.cameraHelper);
+
+        // Initialize tool animator FIRST so it's ready for hand block display
+        this.toolAnimator = new ToolAnimator(this.camera);
+
+        // Initialize tool manager
+        this.toolManager = new ToolManager();
+        this.toolManager.setCurrentTool(TOOL_TYPES.HAND.id);
+
+        // Create block meshes for display on hand BEFORE toolbar
+        this.createBlockMeshes();
+
+        // Initialize toolbar AFTER meshes are created
+        this.toolbar = new Toolbar(this);
+        this.equipHotbarItem(this.toolbar.getSelectedItem());
 
         this.boundsHelper = new THREE.Mesh(
             new THREE.CylinderGeometry(
@@ -53,6 +75,9 @@ export class Player {
 
         document.addEventListener("keydown", this.onKeyDown.bind(this));
         document.addEventListener("keyup", this.onKeyUp.bind(this));
+        document.addEventListener("wheel", this.onMouseWheel.bind(this), {
+            passive: false,
+        });
 
         const selectionMaterial = new THREE.MeshBasicMaterial({
             transparent: true,
@@ -162,10 +187,12 @@ export class Player {
             case "Digit6":
             case "Digit7":
             case "Digit8":
-            case "Digit9":
-                this.activeBlockId = Number(event.key);
-                console.log(`activeBlockId = ${event.key}`);
+            case "Digit9": {
+                const slotIndex = (Number(event.key) - 1 + 9) % 9; // 0 becomes 9th slot
+                const item = this.toolbar.selectSlot(slotIndex);
+                console.log(`Selected slot ${slotIndex}: ${item.label}`);
                 break;
+            }
             case "KeyW":
                 this.input.z = this.maxSpeed;
                 break;
@@ -207,11 +234,117 @@ export class Player {
         }
     }
 
+    onMouseWheel(event) {
+        if (!this.controls.isLocked) return;
+        
+        event.preventDefault();
+        
+        if (event.deltaY > 0) {
+            // Scroll down - next slot
+            this.toolbar.nextSlot();
+        } else if (event.deltaY < 0) {
+            // Scroll up - previous slot
+            this.toolbar.prevSlot();
+        }
+    }
+
     toString() {
         let str = ``;
-        str += `X: ${this.position.x.toFixed(3)}`;
-        str += `Y: ${this.position.y.toFixed(3)}`;
+        str += `X: ${this.position.x.toFixed(3)} `;
+        str += `Y: ${this.position.y.toFixed(3)} `;
         str += `Z: ${this.position.z.toFixed(3)}`;
         return str;
+    }
+
+    /**
+     * Create simple block meshes for hand display
+     */
+    createBlockMeshes() {
+        const blockTypes = Object.values(blocks).filter((block) => {
+            return (
+                Number.isInteger(block.id) &&
+                block.id !== blocks.empty.id &&
+                block.material
+            );
+        });
+
+        for (const block of blockTypes) {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const mesh = new THREE.Mesh(geometry, block.material);
+            this.blockMeshes[block.id] = mesh;
+        }
+    }
+
+    /**
+     * Equip a block or tool from the hotbar and refresh first-person display.
+     */
+    equipHotbarItem(item) {
+        if (!item) return;
+
+        if (item.type === HOTBAR_ITEM_TYPES.TOOL) {
+            this.activeBlockId = blocks.empty.id;
+            this.toolManager.setCurrentTool(item.toolId);
+        } else {
+            this.activeBlockId = item.blockId;
+            this.toolManager.setCurrentTool(TOOL_TYPES.HAND.id);
+        }
+
+        this.updateHandBlock();
+        this.onSelectedItemChanged?.(item);
+    }
+
+    /**
+     * Update the block displayed in the player's hand
+     */
+    updateHandBlock() {
+        if (!this.toolAnimator || !this.blockMeshes) return;
+
+        const selectedItem = this.toolbar?.getSelectedItem();
+        if (selectedItem?.type === HOTBAR_ITEM_TYPES.TOOL) {
+            this.toolAnimator.setPickaxeModel();
+        } else if (this.activeBlockId === blocks.empty.id) {
+            this.toolAnimator.setBlockMesh(null);
+        } else if (this.blockMeshes[this.activeBlockId]) {
+            this.toolAnimator.setBlockMesh(this.blockMeshes[this.activeBlockId]);
+        } else {
+            // Fallback for blocks without a mesh yet
+            this.toolAnimator.setBlockMesh(null);
+        }
+    }
+
+    /**
+     * Update the player state including animations
+     */
+    updatePlayer(deltaTime) {
+        this.toolAnimator.update(deltaTime);
+        this.toolbar.update();
+    }
+
+    /**
+     * Check if the player can break a block with current tool
+     * @param {number} blockId
+     * @returns {Object} { canBreak: boolean, reason: string }
+     */
+    canBreakBlock(blockId) {
+        return this.toolManager.canBreakBlock(blockId);
+    }
+
+    /**
+     * Get current tool info
+     * @returns {Object} tool info
+     */
+    getCurrentTool() {
+        return this.toolManager.getCurrentTool();
+    }
+
+    /**
+     * Switch to a different tool
+     * @param {number} toolId
+     */
+    switchTool(toolId) {
+        if (this.toolManager.setCurrentTool(toolId)) {
+            this.updateHandBlock();
+            this.onSelectedItemChanged?.(this.toolbar?.getSelectedItem());
+        }
     }
 }

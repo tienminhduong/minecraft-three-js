@@ -21,6 +21,14 @@ const textures = {
     treeSide: loadTexture("textures/tree_side.png"),
     treeTop: loadTexture("textures/tree_top.png"),
     sand: loadTexture("textures/sand.png"),
+    snow: loadTexture("textures/snow.png"),
+    snowSide: loadTexture("textures/snow_side.png"),
+    cactusTop: loadTexture("textures/cactus_top.png"),
+    cactusSide: loadTexture("textures/cactus_side.png"),
+    jungleLeaves: loadTexture("textures/jungle_leaves.png"),
+    jungleTreeSide: loadTexture("textures/jungle_tree_side.png"),
+    jungleTreeTop: loadTexture("textures/jungle_tree_top.png"),
+    cobblestone: loadTexture("textures/cobblestone.png"),
 };
 
 export const blocks = {
@@ -98,6 +106,76 @@ export const blocks = {
         visible: true,
         material: new THREE.MeshBasicMaterial({ color: 0xf0f0f0 }),
     },
+    snow: {
+        id: 10,
+        name: "snow",
+        visible: true,
+        material: [
+            new THREE.MeshLambertMaterial({ map: textures.snowSide }), // right
+            new THREE.MeshLambertMaterial({ map: textures.snowSide }), // left
+            new THREE.MeshLambertMaterial({ map: textures.snow }), // top
+            new THREE.MeshLambertMaterial({ map: textures.dirt }), // bottom
+            new THREE.MeshLambertMaterial({ map: textures.snowSide }), // front
+            new THREE.MeshLambertMaterial({ map: textures.snowSide }), // back
+        ],
+    },
+    cactus: {
+        id: 11,
+        name: "cactus",
+        visible: true,
+        material: [
+            new THREE.MeshLambertMaterial({ map: textures.cactusSide }), // right
+            new THREE.MeshLambertMaterial({ map: textures.cactusSide }), // left
+            new THREE.MeshLambertMaterial({ map: textures.cactusTop }), // top
+            new THREE.MeshLambertMaterial({ map: textures.cactusTop }), // bottom
+            new THREE.MeshLambertMaterial({ map: textures.cactusSide }), // front
+            new THREE.MeshLambertMaterial({ map: textures.cactusSide }), // back
+        ],
+    },
+    jungleLeaves: {
+        id: 12,
+        name: "jungle_leaves",
+        visible: true,
+        material: new THREE.MeshLambertMaterial({ map: textures.jungleLeaves }),
+    },
+    jungleTree: {
+        id: 13,
+        name: "jungle_tree",
+        visible: true,
+        material: [
+            new THREE.MeshLambertMaterial({ map: textures.jungleTreeSide }), // right
+            new THREE.MeshLambertMaterial({ map: textures.jungleTreeSide }), // left
+            new THREE.MeshLambertMaterial({ map: textures.jungleTreeTop }), // top
+            new THREE.MeshLambertMaterial({ map: textures.jungleTreeTop }), // bottom
+            new THREE.MeshLambertMaterial({ map: textures.jungleTreeSide }), // front
+            new THREE.MeshLambertMaterial({ map: textures.jungleTreeSide }), // back
+        ],
+    },
+    cobblestone: {
+        id: 14,
+        name: "cobblestone",
+        visible: true,
+        material: new THREE.MeshLambertMaterial({ map: textures.cobblestone }),
+    },
+    
+    // Map of block IDs to display names
+    names: {
+        0: "Empty",
+        1: "Grass",
+        2: "Dirt",
+        3: "Stone",
+        4: "Coal Ore",
+        5: "Iron Ore",
+        6: "Tree",
+        7: "Leaves",
+        8: "Sand",
+        9: "Cloud",
+        10: "Snow",
+        11: "Cactus",
+        12: "Jungle Leaves",
+        13: "Jungle Tree",
+        14: "Cobblestone",
+    }
 };
 
 export const resources = [blocks.stone, blocks.coalOre, blocks.ironOre];

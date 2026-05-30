@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { WorldChunk } from "./worldChunk";
 import { Player } from "./player";
 import { DataStore } from "./dataStore";
+import { BiomeGenerator } from "./biomes";
 
 export class World extends THREE.Group {
     /**
@@ -62,9 +63,15 @@ export class World extends THREE.Group {
      */
     dataStore = new DataStore();
 
+    /**
+     * Biome generator for terrain
+     */
+    biomeGenerator = null;
+
     constructor(seed = 0) {
         super();
         this.seed = seed;
+        this.biomeGenerator = new BiomeGenerator(seed);
     }
 
     /**
@@ -177,6 +184,7 @@ export class World extends THREE.Group {
             this.chunkSize,
             this.params,
             this.dataStore,
+            this.biomeGenerator,
         );
         chunk.position.set(
             x * this.chunkSize.width,

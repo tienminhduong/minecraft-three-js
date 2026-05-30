@@ -14,11 +14,12 @@ export class WorldChunk extends THREE.Group {
      */
     data = [];
 
-    constructor(size, params, dataStore) {
+    constructor(size, params, dataStore, biomeGenerator = null) {
         super();
         this.size = size;
         this.params = params;
         this.dataStore = dataStore;
+        this.biomeGenerator = biomeGenerator;
         this.loaded = false;
     }
 
@@ -292,7 +293,13 @@ export class WorldChunk extends THREE.Group {
         // Create lookup table of InstancedMesh's with the block id being the key
         const meshes = {};
         Object.values(blocks)
-            .filter((blockType) => blockType.id !== blocks.empty.id)
+            .filter((blockType) => {
+                return (
+                    Number.isInteger(blockType.id) &&
+                    blockType.id !== blocks.empty.id &&
+                    blockType.material
+                );
+            })
             .forEach((blockType) => {
                 const maxCount =
                     this.size.width * this.size.width * this.size.height;
@@ -419,7 +426,11 @@ export class WorldChunk extends THREE.Group {
         const block = this.getBlock(x, y, z);
 
         // If this block is non-empty and does not already have an instance, create a new one
-        if (block && block.id !== blocks.empty.id && !block.instanceId) {
+        if (
+            block &&
+            block.id !== blocks.empty.id &&
+            (block.instanceId === null || block.instanceId === undefined)
+        ) {
             // Append a new instance to the end of our InstancedMesh
             const mesh = this.children.find(
                 (instanceMesh) => instanceMesh.name === block.id,
@@ -448,7 +459,11 @@ export class WorldChunk extends THREE.Group {
     deleteBlockInstance(x, y, z) {
         const block = this.getBlock(x, y, z);
 
-        if (block.id === blocks.empty.id || !block.instanceId) return;
+        if (
+            block.id === blocks.empty.id ||
+            block.instanceId === null ||
+            block.instanceId === undefined
+        ) return;
 
         // Get the mesh and instance id of the block
         const mesh = this.children.find(
