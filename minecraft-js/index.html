@@ -1,51 +1,50 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/src/assets/minecraft.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel ="stylesheet" href="/style.css">
-    <title>Minecraft.js</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <div id="start-screen" class="start-screen" role="dialog" aria-labelledby="start-title" aria-modal="true">
-      <div class="start-screen-content">
-        <h1 id="start-title" class="start-title">MINECRAFT.JS</h1>
-        <div class="start-controls" aria-label="Game controls">
-          <div class="control-row"><span>WASD</span><span>Di chuyển</span></div>
-          <div class="control-row"><span>SPACE</span><span>Nhảy</span></div>
-          <div class="control-row"><span>R</span><span>Reset vị trí camera</span></div>
-          <div class="control-row"><span>Chuột trái</span><span>Phá block</span></div>
-          <div class="control-row"><span>Chuột phải</span><span>Đặt block đang chọn</span></div>
-          <div class="control-row"><span>Lăn chuột</span><span>Đổi ô hotbar</span></div>
-          <div class="control-row"><span>1-8</span><span>Chọn block</span></div>
-          <div class="control-row"><span>9 / 0</span><span>Chọn Stone Pickaxe</span></div>
-          <div class="control-row"><span>T</span><span>Nâng cấp pickaxe</span></div>
-          <div class="control-row"><span>Ctrl/Cmd + S</span><span>Save game</span></div>
-          <div class="control-row"><span>Ctrl/Cmd + L</span><span>Load game</span></div>
-          <div class="control-row"><span>UI buttons</span><span>Save, Load, Clear</span></div>
-        </div>
-        <button id="start-game" class="start-button" type="button">Start Game</button>
-        <p class="start-hint">Hoặc nhấn phím bất kỳ để vào game</p>
-      </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minecraft.js</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div id="app"></div>
+  <div id="info">
+    <div id="info-player-position"></div>
+  </div>
+  <div id="toolbar-container">
+    <div id="toolbar">
+      <img class="toolbar-icon" id="toolbar-1" src="textures/grass.png"></img>
+      <img class="toolbar-icon" id="toolbar-2" src="textures/dirt.png"></img>
+      <img class="toolbar-icon" id="toolbar-3" src="textures/stone.png"></img>
+      <img class="toolbar-icon" id="toolbar-4" src="textures/coal_ore.png"></img>
+      <img class="toolbar-icon" id="toolbar-5" src="textures/iron_ore.png"></img>
+      <img class="toolbar-icon" id="toolbar-6" src="textures/tree_top.png"></img>
+      <img class="toolbar-icon" id="toolbar-7" src="textures/leaves.png"></img>
+      <img class="toolbar-icon" id="toolbar-8" src="textures/sand.png"></img>
+      <img class="toolbar-icon selected" id="toolbar-0" src="textures/pickaxe.png"></img>
     </div>
-    <div id="crosshair">
-      <div class="crosshair-line crosshair-h"></div>
-      <div class="crosshair-line crosshair-v"></div>
+  </div>
+  <div id="overlay">
+    <div id="instructions">
+      <h1>MINECRAFTjs</h1>
+      WASD - Move<br>
+      SHIFT - Sprint<br>
+      SPACE - Jump<br>
+      R - Reset Camera<br>
+      U - Toggle UI
+      0 - Pickaxe<br>
+      1-8 - Select Block<br>
+      F1 - Save Game<br>
+      F2 - Load Game<br>
+      F10 - Debug Camera<br><br>
+      <h2>PRESS ANY KEY TO START</h2>
     </div>
-    <div id="save-load-panel">
-      <button id="save-game" class="save-load-btn" title="Save game (Ctrl+S)">💾 Save</button>
-      <button id="load-game" class="save-load-btn" title="Load game (Ctrl+L)">📂 Load</button>
-      <button id="clear-game" class="save-load-btn danger" title="Clear saved data">🗑️ Clear</button>
-    </div>
-    <div id="tool-info">
-      <div id="current-tool">⛏️ Stone Pickaxe</div>
-    </div>
-    <div id="info">
-      <div id="player-position"></div>
-      <div id="save-status"></div>
-    </div>
-    <script type="module" src="/Scripts/main.js"></script>
-  </body>
+  </div>
+  <div id="status"></div>
+  <script type="module" src="./scripts/main.js"></script>
+</body>
+
 </html>
