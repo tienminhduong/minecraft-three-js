@@ -6,6 +6,7 @@ import { Player } from "./player";
 import { Physics } from "./physics";
 import { setupUI } from "./ui";
 import { ModelLoader } from "./modelLoader";
+import { Mob } from "./mob";
 
 // UI Setup
 const stats = new Stats();
@@ -47,6 +48,28 @@ controls.update();
 const modelLoader = new ModelLoader((models) => {
     player.setTool(models.pickaxe);
 });
+
+const mobs = [];
+const mobModelPath = "models/minecraft-creeper/source/model.gltf";
+
+function spawnMobs(count) {
+    for (let i = 0; i < count; i++) {
+        const x = 36 + (Math.random() - 0.5) * 20;
+        const z = 36 + (Math.random() - 0.5) * 20;
+        const pos = new THREE.Vector3(x, 32, z);
+        const m = new Mob(scene, world, {
+            modelPath: mobModelPath,
+            position: pos,
+            scale: 0.02,
+            walkSpeed: 1.0 + Math.random() * 0.6,
+            roamRadius: 8 + Math.random() * 8,
+            idleChance: 0.4,
+        });
+        mobs.push(m);
+    }
+}
+
+spawnMobs(10);
 
 let sun;
 function setupLights() {
@@ -97,6 +120,10 @@ function animate() {
             .copy(player.position)
             .add(new THREE.Vector3(16, 16, 16));
         controls.target.copy(player.position);
+    }
+
+    for (const mob of mobs) {
+        mob.update(dt, world);
     }
 
     renderer.render(
